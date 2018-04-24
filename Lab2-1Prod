@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+
+#include <unistd.h>
+#include<sys/types.h>
+
+int main()
+{
+	/* the size (in bytes) of the shared memory object */
+	const int SIZE = 4096;
+	/* name of the shared memory object */
+	const char *name = "OS";
+	/*string written to shared memory */
+	const char *message_0 = "Hello";
+	const char *message_1 = "World!\n";
+
+	/* shared memory file descriptor */
+	int shm_fd;
+
+	/* pointer to shared memory object */
+	void *ptr;
+
+	/* create the shared memory object */
+        /* shm_open(const char *name, int oflag, mode_t mode)*/
+	shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+
+	/* configrue the size of the shared memory object */
+	/* truncate sets the size of the shared memory */
+	ftruncate(shm_fd, SIZE);
+
+	/* memory map the shared memory object */
+	/* creates a new mapping in the virtual address space of the caling process
+	 if address is NULL then the kernel chooses the address at which to create the mapping -> most portable
+	 if address is not null, kernel takes it as a hint about where to place mapping in linux this will be
+	 created at a nearby page boundary
+	 the address of teh new ampping is returned as a result of the call
+	 length of mapping must be greater than 0
+	 prot = desired memory protection of the mapping (must not conflict with the open mode of the file)
+fd = file descriptor
+the content of a file mapping are initialised using lnegth bytes starting at offset in the file referred to by the file descriptor
+	 void *mmap(void *address, size_t length, int prot, int flags, int fd, off_t offset) */
+	ptr = mmap (0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0);
+
+	/* write to teh shared memory object
+	   %s = string
+ */
+	sprintf(ptr, "%s", message_0);
+	/* point to memory plus old messgae length so don't override */
+	ptr += strlen(message_0);
+	sprintf(ptr, "%s", message_1);
+	ptr += strlen(message_1);
+
+	return 0;
+}
+
