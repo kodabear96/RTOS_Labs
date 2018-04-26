@@ -1,24 +1,40 @@
 #include <stdio.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
 
 int sum(int start, int end);
 
 int main() {
+	//fork a child process
   pid_t pid;
-  switch (pid=fork()) {
+  pid=fork();
+  printf("pid order: pid=%d\n", pid);
+  switch (pid) {
+  	case -1:
+  		//an error has occured
+  		printf("fork error");
+  		break;
     case 0:
+    /* This code is executed by the first parent */
+      printf("First child process is born, my pid is %d\n", getpid());
       printf("Child calc: %d\n", sum(1, 10000));
+      printf("Child dies quietly.\n");
       break;
     default:
+    /* This code is executed by the parent process */
+      printf("Parent process is born, my pid is %d\n", getpid());
+      wait(NULL);
       printf("Parent calc: %d\n", sum(-10000, -1));
+      printf("Parent process dies quietly.\n");
   }
   return 0;
 }
 
 int sum(int start, int end) {
   int sum = 0;
-  for (int i = start; i <= end; i++) {
+  int i = start;
+  for (i; i <= end; i++) {
     sum += i;
   }
   return sum;
