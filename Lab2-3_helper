@@ -1,0 +1,30 @@
+#include <sys/types.h>
+#include <stdio.h>
+#include <unistd.h>
+
+int main()
+{
+	pid_t pid;
+	/* fork a child process */
+	pid = fork();
+	printf("pid order: pid=%d\n", pid); //to see the pid execute order
+	if(pid<0)/*error occured */
+	{
+		fprintf(stderr, "Fork failed");
+		return 1;
+	}
+	else if(pid ==0) /*child process */
+	{
+		printf("Child begins, to do Ls operation, pid=%d\n", pid);
+		execlp("/bin/ls", "ls", NULL); //run te structor execlp and complete the child process
+	}
+	else //if comment this line, parnets and child will both run the following lines.
+	{
+		//Partent Process
+		//parent will wait for child to complete
+		wait(NULL);
+		printf("\nChild Complete and back to Parent \n");
+	}
+	printf("see what pid is now: pid=%d\n", pid); //to see the pid execute order
+	return 0;
+}
